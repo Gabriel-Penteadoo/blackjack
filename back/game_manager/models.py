@@ -8,7 +8,6 @@ class Game(models.Model):
     def __str__(self):
         return self.name
 
-    # Exemple de méthode personnalisée
     def start_game(self):
         """Démarre la partie"""
         self.turn = 1
