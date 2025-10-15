@@ -3,6 +3,7 @@
 # ----------------------------
 /back/blackjack/__pycache__/
 /back/game_manager/__pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 
