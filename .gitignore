@@ -1,4 +1,3 @@
-
 # ----------------------------
 # Python
 # ----------------------------
@@ -17,13 +16,13 @@ dist/
 *.log
 *.pot
 *.pyc
-*.sqlite3         # Database file
-media/            # Uploaded files
-/staticfiles/     # Collected static files
+*.sqlite3          # Database file
+media/             # Uploaded files
+/staticfiles/      # Collected static files
 
-# If you want to ignore migrations (optional)
-# */migrations/*.pyc
-# */migrations/__pycache__/
+# Migrations (keep migrations themselves, ignore compiled files)
+*/migrations/*.pyc
+*/migrations/__pycache__/
 
 # ----------------------------
 # Virtual environments
