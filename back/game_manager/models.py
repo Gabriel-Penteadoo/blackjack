@@ -71,9 +71,10 @@ class Player(models.Model):
         if self.stand or self.busted or self.game.ended:
             return None
 
-        roll = random.randint(1, 6)
-        self.score += roll
-        if self.score > 21:
+        dels = max(1, min(3, dels))  # Clamp dels to 1-3
+        rolls = [random.randint(1, 6) for _ in range(dels)]
+        self.score += sum(rolls)
+        if self.score > 21:     # Max score is 21
             self.busted = True
         self.save()
         return roll
