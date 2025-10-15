@@ -21,6 +21,7 @@ class GameSchema(BaseModel):
     turn: int
     ended: bool
     players: List[PlayerSchema]
+    winners: Optional[List[PlayerSchema]] = None
 
 class RollResponse(BaseModel):
     player: PlayerSchema
@@ -42,32 +43,41 @@ def start_game(request, data: StartGameRequest):
     return serialize_game(game)
 
 
-# --- Endpoint to play/roll dice ---
+
 @api.post("/play/{dels}", response=RollResponse)
 def play_turn(request, dels: int):
-    # Clamp dice between 1-3
-    dels = max(1, min(3, dels))
-    
-    # Find active game(s) with players still playing
-    active_games = Game.objects.filter(ended=False)
-    if not active_games.exists():
+    # Find the active game
+    game = Game.objects.filter(ended=False).first()
+    if not game:
         return {"player": None, "rolls": None, "message": "No active game."}
-    
-    game = active_games.first()
+
     player = game.current_player()
     if not player:
         return {"player": None, "rolls": None, "message": "No current player."}
-    
+
     if player.stand or player.busted:
-        return {"player": serialize_player(player), "rolls": None, "message": "Player cannot roll."}
+        return {"player": serialize_player(player), "rolls": None, "message": "Player cannot move."}
 
+    # Stand if dels=0
+    if dels == 0:
+        player.hold()
+        game.next_turn()
+        return {
+            "player": serialize_player(player),
+            "rolls": None,
+            "message": f"{player.name} chose to stand."
+        }
+
+    # Otherwise roll dice 1-3
+    dels = max(1, min(3, dels))
     rolls = player.roll_dice(dels=dels)
-    
-    # Move to next turn
     game.next_turn()
-    
-    return {"player": serialize_player(player), "rolls": rolls, "message": f"{player.name} rolled {rolls}"}
 
+    return {
+        "player": serialize_player(player),
+        "rolls": rolls,
+        "message": f"{player.name} rolled {rolls}"
+    }
 
 # --- Endpoint to get game state ---
 @api.get("/get/{game_id}", response=GameSchema)
@@ -92,5 +102,6 @@ def serialize_game(game: Game) -> GameSchema:
         name=game.name,
         turn=game.turn,
         ended=game.ended,
-        players=[serialize_player(p) for p in game.players.all().order_by("id")]
+        players=[serialize_player(p) for p in game.players.all().order_by("id")],
+        winners = [serialize_player(p) for p in game.winners()] if game.ended else None
     )

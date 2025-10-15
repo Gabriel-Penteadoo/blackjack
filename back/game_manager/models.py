@@ -67,17 +67,17 @@ class Player(models.Model):
     def __str__(self):
         return f"{self.name} (Game: {self.game.name}, Score: {self.score})"
 
-    def roll_dice(self):
+    def roll_dice(self, dels = 1):
         if self.stand or self.busted or self.game.ended:
             return None
 
-        dels = max(1, min(3, dels))  # Clamp dels to 1-3
+        dels = max(1, min(3, dels))  # Forces dels to be between 1 to 3
         rolls = [random.randint(1, 6) for _ in range(dels)]
         self.score += sum(rolls)
         if self.score > 21:     # Max score is 21
             self.busted = True
         self.save()
-        return roll
+        return rolls
 
     def hold(self):
         self.stand = True
