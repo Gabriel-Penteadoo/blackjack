@@ -1,40 +1,36 @@
-import { useState, useEffect } from "react";
-import { getGame, playTurn } from "../api/blackjack";
+import { useState } from "react";
+import { startGame, playTurn, getGame } from "../api/blackjack";
 
-export default function useBlackjack(gameId) {
+export function useBlackjack() {
   const [game, setGame] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const fetchGame = async () => {
-    try {
-      setLoading(true);
-      const data = await getGame(gameId);
-      setGame(data);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
+  // Start a new game
+  const startNewGame = async (name, playerNames) => {
+    const data = await startGame(name, playerNames);
+    setGame(data);
+    return data.id; // Return game ID so the page can navigate
   };
 
+  // Roll dice
   const rollDice = async (diceCount) => {
-    if (!gameId) return;
-    try {
-      setLoading(true);
-      const data = await playTurn(gameId, diceCount);
-      setGame(data);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
+    if (!game) return;
+    const data = await playTurn(game.id, diceCount); // pass the current game's ID
+    setGame(data);
   };
 
-  useEffect(() => {
-    if (gameId) fetchGame();
-  }, [gameId]);
+  // Stand for the current player
+  const standPlayer = async () => {
+    if (!game) return;
+    const data = await playTurn(game.id, 0); // 0 indicates stand
+    setGame(data);
+  };
 
-  return { game, rollDice, loading, error, fetchGame };
+  // Fetch game by ID
+  const fetchGame = async (id) => {
+    const data = await getGame(id);
+    setGame(data);
+  };
+
+  return { game, startNewGame, rollDice, standPlayer, fetchGame };
 }
 

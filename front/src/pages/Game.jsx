@@ -1,48 +1,57 @@
-import { useParams } from "react-router-dom";
-import useBlackjack from "../hooks/useBlackjack";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useBlackjack } from "../hooks/useBlackjack";
 
 export default function Game() {
-  const { gameId } = useParams();
-  const { game, rollDice, loading, error } = useBlackjack(gameId);
+  const { id } = useParams();
+  const navigate = useNavigate(); // <-- added
+  const { game, fetchGame, rollDice, standPlayer } = useBlackjack();
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  if (!game) return <div>No game found</div>;
+  useEffect(() => {
+    fetchGame(id);
+  }, [id]);
+
+  if (!game) return <div>Loading...</div>;
 
   return (
     <div>
       <h1>{game.name}</h1>
-      {game.ended && game.winners?.length > 0 && (
-        <div>
-          <h2>Winner{game.winners.length > 1 ? "s" : ""}:</h2>
-          <ul>
-            {game.winners.map((w) => (
-              <li key={w.id}>{w.name} ({w.score})</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <h2>Turn: {game.turn}</h2>
 
-      <h2>Players</h2>
       <ul>
-        {game.players.map((p) => (
+        {(game.players || []).map((p) => (
           <li key={p.id}>
-            {p.name}: {p.score} {p.stand ? "(Stand)" : ""}{" "}
-            {p.busted ? "(Busted)" : ""}
+            {p.name} - {p.score}{" "}
+            {p.busted ? "(Busted)" : p.stand ? "(Stand)" : ""}
           </li>
         ))}
       </ul>
 
       {!game.ended && (
         <div>
-          <h3>Roll Dice</h3>
-          {[1, 2, 3].map((n) => (
-            <button key={n} onClick={() => rollDice(n)}>
-              Roll {n} dice
-            </button>
-          ))}
+          <button onClick={() => rollDice(1)}>Roll 1 Dice</button>
+          <button onClick={() => rollDice(2)}>Roll 2 Dice</button>
+          <button onClick={() => rollDice(3)}>Roll 3 Dice</button>
+          <button onClick={standPlayer}>Stand</button>
         </div>
       )}
+
+      {game.ended && (
+        <div>
+          <h2>Game Over!</h2>
+          <h3>Winner(s):</h3>
+          <ul>
+            {(game.winners || []).map((w) => (
+              <li key={w.id}>
+                {w.name} - {w.score}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Button to return to menu */}
+      <button onClick={() => navigate("/")}>Return to Menu</button>
     </div>
   );
 }

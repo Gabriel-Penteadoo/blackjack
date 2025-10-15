@@ -7,7 +7,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<StartGame />} />
-        <Route path="/game/:gameId" element={<Game />} />
+        <Route path="/game/:id" element={<Game />} />
       </Routes>
     </BrowserRouter>
   );

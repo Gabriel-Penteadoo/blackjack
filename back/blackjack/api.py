@@ -40,38 +40,22 @@ def start_game(request, data: StartGameRequest):
     return serialize_game(game)
 
 
-
-@api.post("/play/{dels}", response=RollResponse)
-def play_turn(request, dels: int):
-    game = Game.objects.filter(ended=False).first()
-    if not game:
-        return {"player": None, "rolls": None, "message": "No active game."}
-
+@api.post("/play/{dels}", response=GameSchema)
+def play_turn(request, dels: int, game_id: int):
+    game = get_object_or_404(Game, id=game_id)
     player = game.current_player()
     if not player:
-        return {"player": None, "rolls": None, "message": "No current player."}
-
-    if player.stand or player.busted:
-        return {"player": serialize_player(player), "rolls": None, "message": "Player cannot move."}
+        raise Exception("No current player")
 
     if dels == 0:
         player.hold()
-        game.next_turn()
-        return {
-            "player": serialize_player(player),
-            "rolls": None,
-            "message": f"{player.name} chose to stand."
-        }
+    else:
+        dels = max(1, min(3, dels))
+        player.roll_dice(dels=dels)
 
-    dels = max(1, min(3, dels))
-    rolls = player.roll_dice(dels=dels)
     game.next_turn()
+    return serialize_game(game)
 
-    return {
-        "player": serialize_player(player),
-        "rolls": rolls,
-        "message": f"{player.name} rolled {rolls}"
-    }
 
 @api.get("/get/{game_id}", response=GameSchema)
 def get_game(request, game_id: int):

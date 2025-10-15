@@ -1,47 +1,41 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { startGame } from "../api/blackjack";
+import { useBlackjack } from "../hooks/useBlackjack";
 
 export default function StartGame() {
   const [name, setName] = useState("");
   const [players, setPlayers] = useState([""]);
+  const { startNewGame } = useBlackjack();
   const navigate = useNavigate();
 
-
-const handleStart = async () => {
-  try {
-    const response = await startGame(name, players);
-    console.log("Start Game Response:", response);
-
-    // Use response.id instead of response.game_id
-    navigate(`/game/${response.id}`);
-  } catch (err) {
-    console.error("Failed to start game:", err);
-  }
-};
-
-  const handlePlayerChange = (index, value) => {
+  const addPlayer = () => setPlayers([...players, ""]);
+  const updatePlayer = (index, value) => {
     const newPlayers = [...players];
     newPlayers[index] = value;
     setPlayers(newPlayers);
   };
 
-  const addPlayer = () => setPlayers([...players, ""]);
+  const handleStart = async () => {
+    if (!name || players.some((p) => !p)) return alert("Enter all fields");
+    const id = await startNewGame(name, players);
+    navigate(`/game/${id}`);
+  };
 
   return (
     <div>
-      <h1>Start Blackjack Game</h1>
+      <h1>Start a New Game</h1>
       <input
+        placeholder="Game name"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Game Name"
       />
+      <h2>Players</h2>
       {players.map((p, i) => (
         <input
           key={i}
-          value={p}
-          onChange={(e) => handlePlayerChange(i, e.target.value)}
           placeholder={`Player ${i + 1}`}
+          value={p}
+          onChange={(e) => updatePlayer(i, e.target.value)}
         />
       ))}
       <button onClick={addPlayer}>Add Player</button>
