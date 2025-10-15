@@ -1,4 +1,3 @@
-# api.py
 from ninja import NinjaAPI
 from django.shortcuts import get_object_or_404
 from game_manager.models import Game, Player
@@ -7,7 +6,6 @@ from typing import List, Optional
 
 api = NinjaAPI()
 
-# --- Pydantic Schemas for frontend ---
 class PlayerSchema(BaseModel):
     id: int
     name: str
@@ -25,7 +23,7 @@ class GameSchema(BaseModel):
 
 class RollResponse(BaseModel):
     player: PlayerSchema
-    rolls: Optional[List[int]]  # None if invalid move
+    rolls: Optional[List[int]]
     message: str
 
 class StartGameRequest(BaseModel):
@@ -33,7 +31,6 @@ class StartGameRequest(BaseModel):
     player_names: List[str]
 
 
-# --- Endpoint to start a game ---
 @api.post("/start", response=GameSchema)
 def start_game(request, data: StartGameRequest):
     game = Game.objects.create(name=data.name)
@@ -46,7 +43,6 @@ def start_game(request, data: StartGameRequest):
 
 @api.post("/play/{dels}", response=RollResponse)
 def play_turn(request, dels: int):
-    # Find the active game
     game = Game.objects.filter(ended=False).first()
     if not game:
         return {"player": None, "rolls": None, "message": "No active game."}
@@ -58,7 +54,6 @@ def play_turn(request, dels: int):
     if player.stand or player.busted:
         return {"player": serialize_player(player), "rolls": None, "message": "Player cannot move."}
 
-    # Stand if dels=0
     if dels == 0:
         player.hold()
         game.next_turn()
@@ -68,7 +63,6 @@ def play_turn(request, dels: int):
             "message": f"{player.name} chose to stand."
         }
 
-    # Otherwise roll dice 1-3
     dels = max(1, min(3, dels))
     rolls = player.roll_dice(dels=dels)
     game.next_turn()
@@ -79,14 +73,12 @@ def play_turn(request, dels: int):
         "message": f"{player.name} rolled {rolls}"
     }
 
-# --- Endpoint to get game state ---
 @api.get("/get/{game_id}", response=GameSchema)
 def get_game(request, game_id: int):
     game = get_object_or_404(Game, id=game_id)
     return serialize_game(game)
 
 
-# --- Helper functions ---
 def serialize_player(player: Player) -> PlayerSchema:
     return PlayerSchema(
         id=player.id,
