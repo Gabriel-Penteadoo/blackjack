@@ -1,7 +1,7 @@
 # api.py
 from ninja import NinjaAPI
 from django.shortcuts import get_object_or_404
-from ../game_manager/models import Game, Player
+from ..game_manager.models import Game, Player
 from pydantic import BaseModel
 from typing import List, Optional
 
