@@ -1,0 +1,54 @@
+
+# ----------------------------
+# Python
+# ----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# ----------------------------
+# Django
+# ----------------------------
+*.log
+*.pot
+*.pyc
+*.sqlite3         # Database file
+media/            # Uploaded files
+/staticfiles/     # Collected static files
+
+# If you want to ignore migrations (optional)
+# */migrations/*.pyc
+# */migrations/__pycache__/
+
+# ----------------------------
+# Virtual environments
+# ----------------------------
+venv/
+env/
+.mise/
+
+# ----------------------------
+# IDE / Editors
+# ----------------------------
+# VS Code
+.vscode/
+
+# PyCharm / JetBrains
+.idea/
+
+# ----------------------------
+# OS-specific
+# ----------------------------
+# macOS
+.DS_Store
+
+# Linux
+*.swp
+
+# Windows
+Thumbs.db
