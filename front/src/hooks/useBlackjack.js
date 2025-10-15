@@ -1,52 +1,40 @@
-import { useState } from "react";
-import * as api from "../api/blackjack";
+import { useState, useEffect } from "react";
+import { getGame, playTurn } from "../api/blackjack";
 
-export function useBlackjack() {
+export default function useBlackjack(gameId) {
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleStartGame = async (name, players) => {
+  const fetchGame = async () => {
     try {
       setLoading(true);
-      const data = await api.startGame(name, players);
+      const data = await getGame(gameId);
       setGame(data);
-      return data;
     } catch (err) {
-      setError(err.message);
+      setError(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFetchGame = async (id) => {
+  const rollDice = async (diceCount) => {
+    if (!gameId) return;
     try {
       setLoading(true);
-      const data = await api.getGame(id);
+      const data = await playTurn(gameId, diceCount);
       setGame(data);
     } catch (err) {
-      setError(err.message);
+      setError(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePlayTurn = async (id, diceCount, stand = false) => {
-    try {
-      const data = await api.playTurn(id, diceCount, stand);
-      setGame(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+  useEffect(() => {
+    if (gameId) fetchGame();
+  }, [gameId]);
 
-  return {
-    game,
-    loading,
-    error,
-    handleStartGame,
-    handleFetchGame,
-    handlePlayTurn,
-  };
+  return { game, rollDice, loading, error, fetchGame };
 }
 

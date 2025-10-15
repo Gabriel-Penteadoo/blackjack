@@ -7,15 +7,9 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<StartGame />} />
-        <Route path="/game/:id" element={<Game />} />
+        <Route path="/game/:gameId" element={<Game />} />
       </Routes>
     </BrowserRouter>
   );
 }
-import TestAPI from "./components/TestAPI";
 
-function App() {
-  return <TestAPI />;
-}
-
-export default App;

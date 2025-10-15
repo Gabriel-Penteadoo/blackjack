@@ -4,14 +4,11 @@ export async function startGame(name, playerNames) {
   const res = await fetch(`${API_URL}/start`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name,
-      player_names: playerNames,
-    }),
+    body: JSON.stringify({ name, player_names: playerNames }),
   });
 
   if (!res.ok) throw new Error("Failed to start game");
-  return res.json();
+  return res.json(); // Should include { game_id, name, players }
 }
 
 export async function playTurn(gameId, diceCount) {
@@ -20,7 +17,7 @@ export async function playTurn(gameId, diceCount) {
   });
 
   if (!res.ok) throw new Error("Failed to play turn");
-  return res.json();
+  return res.json(); // Returns updated game state
 }
 
 export async function getGame(gameId) {

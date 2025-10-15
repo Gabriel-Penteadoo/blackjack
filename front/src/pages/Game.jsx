@@ -1,59 +1,46 @@
-import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useBlackjack } from "../hooks/useBlackjack";
+import useBlackjack from "../hooks/useBlackjack";
 
 export default function Game() {
-  const { id } = useParams();
-  const { game, handleFetchGame, handlePlayTurn, loading } = useBlackjack();
+  const { gameId } = useParams();
+  const { game, rollDice, loading, error } = useBlackjack(gameId);
 
-  useEffect(() => {
-    handleFetchGame(id);
-  }, [id]);
-
-  if (loading || !game) return <p className="text-center mt-10">Loading...</p>;
-
-  const rollDice = (n) => handlePlayTurn(game.id, n);
-  const stand = () => handlePlayTurn(game.id, 0, true);
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  if (!game) return <div>No game found</div>;
 
   return (
-    <div className="p-6 text-center">
-      <h1 className="text-3xl font-bold mb-2">{game.name}</h1>
-      <p>Turn: {game.turn}</p>
+    <div>
+      <h1>{game.name}</h1>
+      {game.ended && game.winners?.length > 0 && (
+        <div>
+          <h2>Winner{game.winners.length > 1 ? "s" : ""}:</h2>
+          <ul>
+            {game.winners.map((w) => (
+              <li key={w.id}>{w.name} ({w.score})</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <div className="mt-4 space-y-2">
-        {game.players?.map((p) => (
-          <div key={p.id} className="border p-2 rounded">
-            <strong>{p.name}</strong> — {p.score}
-            {p.busted && <span className="text-red-500 ml-2">💥</span>}
-            {p.stand && <span className="text-yellow-500 ml-2">🛑</span>}
-          </div>
+      <h2>Players</h2>
+      <ul>
+        {game.players.map((p) => (
+          <li key={p.id}>
+            {p.name}: {p.score} {p.stand ? "(Stand)" : ""}{" "}
+            {p.busted ? "(Busted)" : ""}
+          </li>
         ))}
-      </div>
+      </ul>
 
-      {!game.ended ? (
-        <div className="flex justify-center gap-4 mt-6">
+      {!game.ended && (
+        <div>
+          <h3>Roll Dice</h3>
           {[1, 2, 3].map((n) => (
-            <button
-              key={n}
-              onClick={() => rollDice(n)}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Roll {n} 🎲
+            <button key={n} onClick={() => rollDice(n)}>
+              Roll {n} dice
             </button>
           ))}
-          <button
-            onClick={stand}
-            className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-          >
-            Stand ✋
-          </button>
-        </div>
-      ) : (
-        <div className="mt-6">
-          <h2 className="text-2xl font-bold">🏆 Winners</h2>
-          {game.winners?.length
-            ? game.winners.map((w) => <p key={w.id}>{w.name}</p>)
-            : "No winners"}
         </div>
       )}
     </div>
