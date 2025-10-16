@@ -13,7 +13,7 @@ This project uses **Docker** to run a Django backend and a frontend (Vite/React)
 
 ```bash
 git clone https://github.com/Gabriel-Penteadoo/blackjack.git
-cd BootCamp
+cd blackjack
 ```
 
 2. Build and start containers:
