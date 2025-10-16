@@ -1,55 +1,112 @@
-# ----------------------------
-# Python
-# ----------------------------
-/back/blackjack/__pycache__/
-/back/game_manager/__pycache__/
-**/__pycache__/
-*.py[cod]
-*$py.class
+# ============================================
+# Global ignores (system / editor / environment)
+# ============================================
 
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
+# OS files
+.DS_Store
+Thumbs.db
 
-# ----------------------------
-# Django
-# ----------------------------
+# IDE / Editor settings
+.vscode/
+.idea/
+*.code-workspace
+
+# Python virtual environments
+.env
+.venv
+env/
+venv/
+
+# Logs
 *.log
 *.pot
 *.pyc
-*.sqlite3          # Database file
-media/             # Uploaded files
-/staticfiles/      # Collected static files
-
-# Migrations (keep migrations themselves, ignore compiled files)
-*/migrations/*.pyc
-*/migrations/__pycache__/
-
-# ----------------------------
-# Virtual environments
-# ----------------------------
-venv/
-env/
-.mise/
-
-# ----------------------------
-# IDE / Editors
-# ----------------------------
-# VS Code
-.vscode/
-
-# PyCharm / JetBrains
-.idea/
-
-# ----------------------------
-# OS-specific
-# ----------------------------
-# macOS
-.DS_Store
-
-# Linux
+__pycache__/
+*.pyo
+*.pyd
 *.swp
+*.swo
 
-# Windows
-Thumbs.db
+# ============================================
+# Django / Python backend ignores
+# (for /back directory)
+# ============================================
+
+# Django specific
+back/db.sqlite3
+back/media/
+back/staticfiles/
+back/static/
+back/*/migrations/__pycache__/
+back/*/migrations/*.pyc
+back/*/migrations/*.pyo
+
+# Byte-compiled / cache files
+back/__pycache__/
+back/**/__pycache__/
+back/**/*.py[cod]
+
+# Local settings or secrets
+back/.env
+back/.secret_key
+back/.local_settings.py
+
+# Coverage / testing
+htmlcov/
+.coverage
+.tox/
+.nox/
+.pytest_cache/
+
+# ============================================
+# React / Vite frontend ignores
+# (for /front directory)
+# ============================================
+
+# Dependencies
+front/node_modules/
+front/.npm/
+front/.pnpm-store/
+front/.yarn/
+front/package-lock.json
+
+# Build output
+front/dist/
+front/build/
+
+# Local environment variables
+front/.env
+front/.env.local
+front/.env.development.local
+front/.env.test.local
+front/.env.production.local
+
+# Logs
+front/npm-debug.log*
+front/yarn-debug.log*
+front/yarn-error.log*
+
+# Cache
+front/.vite/
+front/.cache/
+front/.eslintcache
+
+# ============================================
+# Git / Misc
+# ============================================
+
+# Backup or temporary files
+*~
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# Lock files
+Pipfile.lock
+poetry.lock
+
+# ============================================
+# End of file
+# ============================================
+
