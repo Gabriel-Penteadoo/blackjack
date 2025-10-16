@@ -22,33 +22,32 @@ class Game(models.Model):
         return self.players.order_by('id')[self.turn - 1] if self.players.exists() else None
 
     def next_turn(self):
-        """Advance to the next active player, or end the game if none remain."""
+
         players = self.players.order_by('id')
         total_players = players.count()
         if total_players == 0:
             return
 
-        # Players still in game
+
         active_players = players.filter(busted=False, stand=False)
         if not active_players.exists():
             self.end_game()
             return
 
-        # Increment turn number cyclically
+
         self.turn = (self.turn % total_players) + 1
 
-        # Find next valid player directly using ORM
-        for _ in range(total_players):  # prevent infinite loop
-            next_player = players[self.turn - 1]
+                for _ in range(total_players):  
+                    next_player = players[self.turn - 1]
             if not next_player.busted and not next_player.stand:
                 break
             self.turn = (self.turn % total_players) + 1
 
-        # Check if everyone is done
+
         if not players.filter(busted=False, stand=False).exists():
             self.end_game()
         else:
-            # New round when looping back to first player
+
             if self.turn == 1:
                 self.turn_count += 1
 
