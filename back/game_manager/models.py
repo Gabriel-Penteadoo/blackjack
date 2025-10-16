@@ -16,38 +16,42 @@ class Game(models.Model):
         self.turn = 1
         self.ended = False
         self.save()
-        for player in self.players.all():
-            player.reset()
+        self.players.update(score=0, busted=False, stand=False)
 
     def current_player(self):
-        players = list(self.players.all().order_by('id'))
-        if not players:
-            return None
-        index = (self.turn - 1) % len(players)
-        return players[index]
+        return self.players.order_by('id')[self.turn - 1] if self.players.exists() else None
 
     def next_turn(self):
-        players = list(self.players.all().order_by('id'))
-        if not players:
+        """Advance to the next active player, or end the game if none remain."""
+        players = self.players.order_by('id')
+        total_players = players.count()
+        if total_players == 0:
             return
 
-        active_players = [p for p in players if not p.stand and not p.busted]
-        if not active_players:
+        # Players still in game
+        active_players = players.filter(busted=False, stand=False)
+        if not active_players.exists():
             self.end_game()
             return
 
-        self.turn = (self.turn % len(players)) + 1
-        next_player = self.current_player()
-        while next_player and (next_player.stand or next_player.busted):
-            self.turn = (self.turn % len(players)) + 1
-            next_player = self.current_player()
-        
-        if all(p.stand or p.busted for p in players):
+        # Increment turn number cyclically
+        self.turn = (self.turn % total_players) + 1
+
+        # Find next valid player directly using ORM
+        for _ in range(total_players):  # prevent infinite loop
+            next_player = players[self.turn - 1]
+            if not next_player.busted and not next_player.stand:
+                break
+            self.turn = (self.turn % total_players) + 1
+
+        # Check if everyone is done
+        if not players.filter(busted=False, stand=False).exists():
             self.end_game()
         else:
-            # only increment turn_count after a full round
-            if self.turn == 1:  # back to first player -> new round
+            # New round when looping back to first player
+            if self.turn == 1:
                 self.turn_count += 1
+
         self.save()
 
     def end_game(self):
@@ -55,6 +59,7 @@ class Game(models.Model):
         self.save()
 
     def winners(self):
+        """Return all players with the highest valid score (<= 21)."""
         valid_players = self.players.filter(score__lte=21)
         if not valid_players.exists():
             return []
