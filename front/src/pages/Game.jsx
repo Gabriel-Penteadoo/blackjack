@@ -19,7 +19,8 @@ export default function Game() {
   return (
     <div>
       <h1>{game.name}</h1>
-      <h2>Turn: {game.turn}</h2>
+      <h2>Turn: {game.turn_count}</h2>
+      <p>Current Player: {game.current_player}</p>
 
       <PlayerList players={game.players} />
 

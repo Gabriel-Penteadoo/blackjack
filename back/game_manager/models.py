@@ -5,6 +5,7 @@ import random
 class Game(models.Model):
     name = models.CharField(max_length=250)
     turn = models.IntegerField(default=0)
+    turn_count = models.IntegerField(default=1)
     ended = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -40,9 +41,13 @@ class Game(models.Model):
         while next_player and (next_player.stand or next_player.busted):
             self.turn = (self.turn % len(players)) + 1
             next_player = self.current_player()
-
+        
         if all(p.stand or p.busted for p in players):
             self.end_game()
+        else:
+            # only increment turn_count after a full round
+            if self.turn == 1:  # back to first player -> new round
+                self.turn_count += 1
         self.save()
 
     def end_game(self):

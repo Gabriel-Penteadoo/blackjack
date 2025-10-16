@@ -17,7 +17,9 @@ class GameSchema(BaseModel):
     id: int
     name: str
     turn: int
+    turn_count: int
     ended: bool
+    current_player: Optional[str] = None
     players: List[PlayerSchema]
     winners: Optional[List[PlayerSchema]] = None
 
@@ -73,11 +75,16 @@ def serialize_player(player: Player) -> PlayerSchema:
     )
 
 def serialize_game(game: Game) -> GameSchema:
+    current_player = game.current_player()  # <-- define it here
+
     return GameSchema(
         id=game.id,
         name=game.name,
         turn=game.turn,
+        turn_count=game.turn_count,
         ended=game.ended,
+        current_player=current_player.name if current_player else None,
         players=[serialize_player(p) for p in game.players.all().order_by("id")],
-        winners = [serialize_player(p) for p in game.winners()] if game.ended else None
+        winners=[serialize_player(p) for p in game.winners()] if game.ended else None
     )
+
