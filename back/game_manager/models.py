@@ -81,6 +81,8 @@ class Player(models.Model):
         self.score += sum(rolls)
         if self.score > 21:     # Max score is 21
             self.busted = True
+        elif self.score == 21:
+            self.stand = True
         self.save()
         return rolls
 
