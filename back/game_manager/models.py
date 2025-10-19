@@ -19,35 +19,38 @@ class Game(models.Model):
         self.players.update(score=0, busted=False, stand=False)
 
     def current_player(self):
-        return self.players.order_by('id')[self.turn - 1] if self.players.exists() else None
+        if not self.players.exists():
+            return None
+        return self.players.order_by('id')[self.turn - 1]
 
     def next_turn(self):
-
+        """Advance to the next active player, or end the game if none remain."""
         players = self.players.order_by('id')
         total_players = players.count()
         if total_players == 0:
             return
 
-
+        # Players still in game
         active_players = players.filter(busted=False, stand=False)
         if not active_players.exists():
             self.end_game()
             return
 
-
+        # Increment turn number cyclically
         self.turn = (self.turn % total_players) + 1
 
-                for _ in range(total_players):  
-                    next_player = players[self.turn - 1]
+        # Find next valid player directly using ORM
+        for _ in range(total_players):  # prevent infinite loop
+            next_player = players[self.turn - 1]
             if not next_player.busted and not next_player.stand:
                 break
             self.turn = (self.turn % total_players) + 1
 
-
+        # Check if everyone is done
         if not players.filter(busted=False, stand=False).exists():
             self.end_game()
         else:
-
+            # New round when looping back to first player
             if self.turn == 1:
                 self.turn_count += 1
 
@@ -76,17 +79,19 @@ class Player(models.Model):
     def __str__(self):
         return f"{self.name} (Game: {self.game.name}, Score: {self.score})"
 
-    def roll_dice(self, dels = 1):
+    def roll_dice(self, dels=1):
         if self.stand or self.busted or self.game.ended:
             return None
 
-        dels = max(1, min(3, dels))  # Forces dels to be between 1 to 3
+        dels = max(1, min(3, dels))  # Force dels between 1 and 3
         rolls = [random.randint(1, 6) for _ in range(dels)]
         self.score += sum(rolls)
-        if self.score > 21:     # Max score is 21
+
+        if self.score > 21:
             self.busted = True
         elif self.score == 21:
             self.stand = True
+
         self.save()
         return rolls
 
@@ -99,3 +104,4 @@ class Player(models.Model):
         self.busted = False
         self.stand = False
         self.save()
+
