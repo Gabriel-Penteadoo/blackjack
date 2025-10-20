@@ -1,10 +1,9 @@
-version: "3.9"
 
 services:
   backend:
     build:
-      context: ./back
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: back/Dockerfile
     volumes:
       - ./back:/app
       - static_volume:/app/static
@@ -18,18 +17,17 @@ services:
 
   frontend:
     build:
-      context: ./front
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: front/Dockerfile
     volumes:
       - ./front:/app
-      - /app/node_modules   # keep node_modules inside container
+      - /app/node_modules
     ports:
-      - "5173:5173"   # Vite default port
+      - "5173:5173"   # Match Vite default port
     environment:
       - CHOKIDAR_USEPOLLING=true
       - VITE_API_URL=http://localhost:8000/api
-    command: >
-      sh -c "sleep 5 && npm run dev -- --host 0.0.0.0"
+    command: npm run dev -- --host 0.0.0.0   # <-- Expose Vite server to Docker network
 
 volumes:
   static_volume:
