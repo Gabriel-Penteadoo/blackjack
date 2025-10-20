@@ -1,17 +1,19 @@
+# front/Dockerfile
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package.json and install dependencies
+# Copy only package files first (for better caching)
 COPY front/package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy frontend code
-COPY front/ .
+# Copy the rest of the frontend code *after* dependencies*
+COPY front/ ./
 
-# Expose port
-EXPOSE 3000
+# Expose Vite dev port
+EXPOSE 5173
 
-# Default command
-CMD ["npm", "start"]
-
+# Default command (Vite dev server)
+CMD ["npm", "run", "dev", "--", "--host"]
